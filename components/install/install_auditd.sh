@@ -13,10 +13,6 @@ apt -qq update
 echo "Installing Auditd..."
 apt -qq -y install auditd
 
-echo "Enabling Auditd..."
-systemctl start auditd
-systemctl enable auditd
-
 # Rules? https://github.com/Neo23x0/auditd/blob/master/audit.rules
 echo "Install Neo23x0 Auditd rules? [y/n] (default: y) "
 read -r user_input
