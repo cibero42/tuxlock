@@ -1,5 +1,4 @@
-from install_class import Installer
-from global_class import OsManip
+from os_class import OsManip, OsPackage
 
 if __name__ == "__main__":
     os_manip = OsManip()
