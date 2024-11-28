@@ -127,3 +127,24 @@ class OsPackage:
 
         self.__enable_program("auditd")
         
+    ####
+    # > (private).install_apparmor
+    # Installs AppArmor.
+    ####
+    def install_apparmor(self):
+        try:
+            if self.__dist == "ubuntu":
+                    print("Installing AppArmor...")
+                    subprocess.run(['apt', 'install', 'apparmor', 'apparmor-utils', 'apparmor-profiles', 'apparmor-notify', '-qq', '-y'], check=True)
+                    user_input = input("Install experimental AppArmor profiles? [y/n] (default: n) ").strip().lower()
+                    if not user_input:
+                        user_input = "n"
+                    
+                    if user_input == "y":
+                        subprocess.run(['apt', 'install', 'apparmor-profiles-extra', '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+
+        self.__enable_program("apparmor.service")
