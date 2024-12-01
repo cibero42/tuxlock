@@ -118,9 +118,8 @@ class OsPackage:
                 user_input = "y"
 
             if user_input == "y":
-                subprocess.run(['wget', '-P', '/etc/audit/', 'https://raw.githubusercontent.com/Neo23x0/auditd/refs/heads/master/audit.rules'], check=True)
-                subprocess.run(['augenrules', '--load'], check=True)
-                subprocess.run(['auditctl', '-l'], check=True)
+                subprocess.run(['wget', '-O', '/etc/audit/audit.rules.auto', 'https://raw.githubusercontent.com/Neo23x0/auditd/refs/heads/master/audit.rules'], check=True)
+                subprocess.run(['auditctl', '-R', '/etc/audit/audit.rules.auto'], check=True)
 
         except Exception as e:
             print("Logic error: " + repr(e))
