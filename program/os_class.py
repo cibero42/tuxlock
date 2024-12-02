@@ -184,6 +184,7 @@ class OsPackage:
         
     ####
     # > (private).install_apparmor
+    # CIS Benchmark v1.0.0 1.3.1.1, 1.3.1.2,, 1.3.1.3 1.3.1.4  (for Ubuntu 24.04)
     # Installs AppArmor.
     ####
     def __install_apparmor(self):
@@ -204,7 +205,10 @@ class OsPackage:
 
         self.__enable_program("apparmor.service")
 
-        # Makes AppArmor be loaded on boot by GRUB
+        # Run all profiles in enforcing mode (CIS 1.3.1.4)
+        subprocess.run(['aa-enforce', '/etc/apparmor.d/*'], check=True)
+
+        # Makes AppArmor be loaded on boot by GRUB (CIS 1.3.1.2)
         with open('/etc/default/grub', 'r') as file:
             lines = file.readlines()
             grub_cmdline_pattern = r'^GRUB_CMDLINE_LINUX="(.*)"'
