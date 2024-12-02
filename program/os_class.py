@@ -221,3 +221,4 @@ class OsPackage:
 
         with open('/etc/default/grub', 'w') as file:
             file.writelines(updated_lines)
+        subprocess.run(['update-grub'], check=True)
