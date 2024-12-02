@@ -130,7 +130,7 @@ class OsPackage:
     # > (private).install_apparmor
     # Installs AppArmor.
     ####
-    def install_apparmor(self):
+    def __install_apparmor(self):
         try:
             if self.__dist == "ubuntu":
                     print("Installing AppArmor...")
