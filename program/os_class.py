@@ -2,6 +2,7 @@ import subprocess
 import os
 import sys
 import glob
+import re
 
 class OsManip:
     def __init__(self):
@@ -202,3 +203,21 @@ class OsPackage:
             print("Logic error: " + repr(e))
 
         self.__enable_program("apparmor.service")
+
+        # Makes AppArmor be loaded on boot by GRUB
+        with open('/etc/default/grub', 'r') as file:
+            lines = file.readlines()
+            grub_cmdline_pattern = r'^GRUB_CMDLINE_LINUX="(.*)"'
+            updated_lines = []
+
+            for line in lines:
+                match = re.match(grub_cmdline_pattern, line)
+                if match:
+                    current_options = match.group(1)
+                    if 'apparmor=1' not in current_options and 'security=apparmor' not in current_options:
+                        new_options = f'{current_options} apparmor=1 security=apparmor'
+                        line = f'GRUB_CMDLINE_LINUX="{new_options}"\n'
+                updated_lines.append(line)
+
+        with open('/etc/default/grub', 'w') as file:
+            file.writelines(updated_lines)
