@@ -184,7 +184,7 @@ class OsPackage:
         
     ####
     # > (private).install_apparmor
-    # CIS Benchmark v1.0.0 1.3.1.1, 1.3.1.2,, 1.3.1.3 1.3.1.4  (for Ubuntu 24.04)
+    # CIS Benchmark v1.0.0 1.3.1.1, 1.3.1.2, 1.3.1.3, 1.3.1.4  (for Ubuntu 24.04)
     # Installs AppArmor.
     ####
     def __install_apparmor(self):
@@ -260,3 +260,11 @@ class OsPackage:
 
         print("Enabling UFW...")
         subprocess.run(['ufw', 'enable'], check=True)
+
+    ####
+    # > (private).install_unattended_upgrades
+    # CIS Benchmark v1.0.0 1.2.2.1 (for Ubuntu 24.04)
+    # Installs Unattended Upgrades
+    ###
+    # def __install_unattended_upgrades(self):
+    # TO DO
