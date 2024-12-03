@@ -1,4 +1,4 @@
-# tuxlock
+# Blue Shield
 Blue Shield is a Python hardening application that's designed to automatize Cybersecurity on Linux servers.
 
 ## Supported Versions
