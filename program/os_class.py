@@ -226,3 +226,37 @@ class OsPackage:
         with open('/etc/default/grub', 'w') as file:
             file.writelines(updated_lines)
         subprocess.run(['update-grub'], check=True)
+
+    ####
+    # > (private).install_ufw
+    # CIS Benchmark v1.0.0 4.2.1 4.2.2 4.2.3 4.2.4 4.2.5 4.2.6 4.2.7 (for Ubuntu 24.04)
+    # Installs UFW
+    ####
+    def __install_ufw(self):
+        try:
+            if self.__dist == "ubuntu":
+                if not self.__get_package("ufw"):
+                    print("Installing UFW...")
+                    subprocess.run(['apt', 'install', 'ufw', '-qq', '-y'], check=True)
+                if self.__get_package("iptables-persistent"):
+                    subprocess.run(['apt', 'purge', 'iptables-persistent', '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+
+        # TO DO: Set up default UFW rules
+        # subprocess.run(['ufw', 'logging', 'on'], check=True)
+        # subprocess.run(['ufw', 'default', 'deny', 'outgoing'], check=True)
+        # subprocess.run(['ufw', 'default', 'deny', 'incoming'], check=True)
+        # subprocess.run(['ufw', 'default', 'deny', 'routed'], check=True)
+        # subprocess.run(['ufw', 'limit', 'in', 'ssh', 'comment', 'allow SSH in'], check=True)
+        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '53', 'proto', 'udp', 'comment', 'allow DNS out'], check=True)
+        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '123', 'proto', 'udp', 'comment', 'allow NTP out'], check=True)
+        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '80', 'proto', 'tcp', 'comment', 'allow HTTP out'], check=True)
+        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '443', 'proto', 'tcp', 'comment', 'allow HTTPS out'], check=True)
+        # TO DO: Loopback interface (CIS 4.2.4)
+        # TO DO: Ask user to open ports (CIS 4.2.6)
+
+        print("Enabling UFW...")
+        subprocess.run(['ufw', 'enable'], check=True)
