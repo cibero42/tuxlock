@@ -206,18 +206,35 @@ class OsPackage:
     # Installs AppArmor.
     ####
     def __install_apparmor(self):
+        self.__install_package("apparmor apparmor-utils apparmor-profiles")
         try:
-            if self.__dist == "ubuntu":
-                    print("Installing AppArmor...")
-                    subprocess.run(['apt', 'install', 'apparmor', 'apparmor-utils', 'apparmor-profiles', 'apparmor-notify', '-qq', '-y'], check=True)
-                    user_input = input("Install experimental AppArmor profiles? [y/n] (default: n) ").strip().lower()
-                    if not user_input:
-                        user_input = "n"
-                    
-                    if user_input == "y":
-                        subprocess.run(['apt', 'install', 'apparmor-profiles-extra', '-qq', '-y'], check=True)
-            else:
-                raise Exception("on Installer.get_package")
+            user_input = input("Install experimental AppArmor profiles? [y/n] (default: n) ").strip().lower()
+            if not user_input:
+                user_input = "n"
+            
+            if user_input == "y":
+                self.__install_package("apparmor-profiles-extra")
+
+            user_input = input("Install roddhjav's profiles (https://github.com/roddhjav/apparmor.d)? [y/n] (default: n) ").strip().lower()
+            if not user_input:
+                user_input = "n"
+            
+            if user_input == "y":
+                print("Configuring AppArmor parser...")
+                subprocess.run(["sudo", "tee", "-a", "/etc/apparmor/parser.conf"], input="write-cache\n", text=True, check=True)
+                subprocess.run(["sudo", "tee", "-a", "/etc/apparmor/parser.conf"], input="Optimize=compress-fast\n", text=True, check=True)
+
+                self.__install_package("build-essential config-package-dev debhelper golang-go git rsync")
+
+                print("Cloning AppArmor profiles repository...")
+                subprocess.run(["git", "clone", "https://github.com/roddhjav/apparmor.d.git"], check=True)
+                os.chdir("apparmor.d")
+
+                print("Building the AppArmor package...")
+                subprocess.run(["dpkg-buildpackage", "-b", "-d", "--no-sign"], check=True)
+
+                print("Installing the AppArmor package...")
+                subprocess.run(["sudo", "dpkg", "-i", "../apparmor.d_*.deb"], shell=True, check=True)
         except Exception as e:
             print("Logic error: " + repr(e))
 
