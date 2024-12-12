@@ -228,6 +228,24 @@ class OsPackage:
         subprocess.run(['update-grub'], check=True)
 
     ####
+    # > (private).install_f2b
+    #
+    # Installs Fail2Ban
+    ###
+    def __install_f2b(self):
+        try:
+            if self.__dist == "ubuntu":
+                if not self.__get_package("fail2ban"):
+                    print("Installing Fail2Ban...")
+                    subprocess.run(['apt', 'install', 'fail2ban', '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+        
+        self.__enable_program("fail2ban")
+
+    ####
     # > (private).install_ufw
     # CIS Benchmark v1.0.0 4.2.1 4.2.2 4.2.3 4.2.4 4.2.5 4.2.6 4.2.7 (for Ubuntu 24.04)
     # Installs UFW
