@@ -123,6 +123,37 @@ class OsPackage:
             print("Logic error: " + repr(e))
 
     ####
+    # > (private).__install_package
+    # Installs a package
+    ####
+    def __install_package(self, program_name):
+        try:
+            if self.__dist == "ubuntu":
+                if not self.__get_package("program_name"):
+                    print(f"Installing {program_name}...")
+                    subprocess.run(['apt', 'install', program_name, '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+
+    ####
+    # > (private).__update_system
+    # Installs a package
+    ####
+    def __update_system(self, program_name):
+        try:
+            if self.__dist == "ubuntu":
+                if not self.__get_package("program_name"):
+                    print(f"Updating system...")
+                    subprocess.run(['apt', 'update', '-qq'], check=True)
+                    subprocess.run(['apt', 'upgrade', '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+
+    ####
     # > (private).__enable_program
     # Starts and enables program
     ####
@@ -145,29 +176,16 @@ class OsPackage:
     # Install dependencies for program execution.
     ####
     def __install_dependencies(self):
-        try:
-            if self.__dist == "ubuntu":
-                subprocess.run(['apt', 'update', '-qq'], check=True)
-                subprocess.run(['apt', 'install', 'wget', '-qq', '-y'], check=True)
-            else:
-                raise Exception("on Installer.get_package")
-
-        except Exception as e:
-            print("Logic error: " + repr(e))
+        self.__update_system()
+        self.__install_package("wget")
 
     ####
     # > (private).install_auditd
     # Installs Auditd.
     ####
     def __install_auditd(self):
-        try:
-            if self.__dist == "ubuntu":
-                if not self.__get_package("auditd"):
-                    print("Installing Auditd...")
-                    subprocess.run(['apt', 'install', 'auditd', '-qq', '-y'], check=True)
-            else:
-                raise Exception("on Installer.get_package")
-            
+        self.__install_package("auditd")
+        try:            
             # Prompt for Neo23x0 Auditd rules
             user_input = input("Install Neo23x0 Auditd rules? [y/n] (default: y): ").strip().lower()
             if not user_input:
@@ -233,16 +251,7 @@ class OsPackage:
     # Installs Fail2Ban
     ###
     def __install_f2b(self):
-        try:
-            if self.__dist == "ubuntu":
-                if not self.__get_package("fail2ban"):
-                    print("Installing Fail2Ban...")
-                    subprocess.run(['apt', 'install', 'fail2ban', '-qq', '-y'], check=True)
-            else:
-                raise Exception("on Installer.get_package")
-        except Exception as e:
-            print("Logic error: " + repr(e))
-        
+        self.__install_package("fail2ban")        
         self.__enable_program("fail2ban")
 
     ####
@@ -251,11 +260,9 @@ class OsPackage:
     # Installs UFW
     ####
     def __install_ufw(self):
+        self.__install_package("ufw")
         try:
             if self.__dist == "ubuntu":
-                if not self.__get_package("ufw"):
-                    print("Installing UFW...")
-                    subprocess.run(['apt', 'install', 'ufw', '-qq', '-y'], check=True)
                 if self.__get_package("iptables-persistent"):
                     subprocess.run(['apt', 'purge', 'iptables-persistent', '-qq', '-y'], check=True)
             else:
