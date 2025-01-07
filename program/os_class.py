@@ -180,7 +180,7 @@ class OsPackage:
         self.__install_package("wget")
 
     ####
-    # > (private).install_auditd
+    # > (private).__install_auditd
     # Installs Auditd.
     ####
     def __install_auditd(self):
@@ -201,7 +201,7 @@ class OsPackage:
         self.__enable_program("auditd")
         
     ####
-    # > (private).install_apparmor
+    # > (private).__install_apparmor
     # CIS Benchmark v1.0.0 1.3.1.1, 1.3.1.2, 1.3.1.3, 1.3.1.4  (for Ubuntu 24.04)
     # Installs AppArmor.
     ####
@@ -263,7 +263,7 @@ class OsPackage:
         subprocess.run(['update-grub'], check=True)
 
     ####
-    # > (private).install_f2b
+    # > (private).__install_f2b
     #
     # Installs Fail2Ban
     ###
@@ -272,12 +272,12 @@ class OsPackage:
         self.__enable_program("fail2ban")
 
     ####
-    # > (private).install_ufw
-    # CIS Benchmark v1.0.0 4.2.1 4.2.2 4.2.3 4.2.4 4.2.5 4.2.6 4.2.7 (for Ubuntu 24.04)
-    # Installs UFW
+    # > (private).__install_firewalld
+    # CIS Benchmark [4.2.1 4.2.2 4.2.3 4.2.4 4.2.5 4.2.6 4.2.7] (for Ubuntu 24.04)
+    # Installs Firewalld
     ####
-    def __install_ufw(self):
-        self.__install_package("ufw")
+    def __install_firewalld(self, en_ipv6, set_def):
+        self.__install_package("firewalld")
         try:
             if self.__dist == "ubuntu":
                 if self.__get_package("iptables-persistent"):
@@ -287,16 +287,37 @@ class OsPackage:
         except Exception as e:
             print("Logic error: " + repr(e))
 
-        # TO DO: Set up default UFW rules
-        # subprocess.run(['ufw', 'logging', 'on'], check=True)
-        # subprocess.run(['ufw', 'default', 'deny', 'outgoing'], check=True)
-        # subprocess.run(['ufw', 'default', 'deny', 'incoming'], check=True)
-        # subprocess.run(['ufw', 'default', 'deny', 'routed'], check=True)
-        # subprocess.run(['ufw', 'limit', 'in', 'ssh', 'comment', 'allow SSH in'], check=True)
-        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '53', 'proto', 'udp', 'comment', 'allow DNS out'], check=True)
-        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '123', 'proto', 'udp', 'comment', 'allow NTP out'], check=True)
-        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '80', 'proto', 'tcp', 'comment', 'allow HTTP out'], check=True)
-        # subprocess.run(['ufw', 'allow', 'out', 'to', 'any', 'port', '443', 'proto', 'tcp', 'comment', 'allow HTTPS out'], check=True)
+        # Set up default Firewalld rules
+        if set_def:
+            subprocess.run(['firewall-cmd', '--permanent', '--zone=public', '--set-target=DROP'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 2 -j DROP'], check=True)
+
+            if en_ipv6:
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 2 -j DROP'], check=True)
+
+            if self.__get_package("docker"):
+                subprocess.run(['firewall-cmd', '--permanent', '--new-zone=docker'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--zone=docker', '--set-target=DROP'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--new-policy=docker-out'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-out', '--add-ingress-zone docker'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-out', '--add-egress-zone public'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-out', '--set-target ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-out', '--add-masquerade'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--new-policy=docker-routing'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-routing', '--add-ingress-zone docker'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-routing', '--add-egress-zone docker'], check=True)
         # TO DO: Loopback interface (CIS 4.2.4)
         # TO DO: Ask user to open ports (CIS 4.2.6)
 
@@ -304,9 +325,9 @@ class OsPackage:
         subprocess.run(['ufw', 'enable'], check=True)
 
     ####
-    # > (private).install_unattended_upgrades
+    # > (private).__install_unattended_upgrades
     # CIS Benchmark v1.0.0 1.2.2.1 (for Ubuntu 24.04)
     # Installs Unattended Upgrades
-    ###
+    ###/
     # def __install_unattended_upgrades(self):
     # TO DO
