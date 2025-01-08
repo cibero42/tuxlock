@@ -3,12 +3,12 @@ import os
 import sys
 import glob
 import re
+import inquirer
 
 class OsManip:
     def __init__(self):
         self.__supported_dists = ["ubuntu", "rhel", "fedora"]
         self.dist = self.__get_dist()
-        print(self.dist)
 
     ####
     # > (private).__get_dist
@@ -43,7 +43,7 @@ class OsManip:
                     subprocess.check_call(['sudo', 'python3'] + sys.argv)
                 except subprocess.CalledProcessError as e:
                     print(f"Failed to escalate to root: {e}")
-                return True
+                self.is_root()
             else:
                 return False
         else:
@@ -103,7 +103,7 @@ class OsManip:
             return results
 
         
-class OsPackage:
+class OsPackages:
     def __init__(self, dist):
         self.__dist = dist
 
@@ -331,3 +331,27 @@ class OsPackage:
     ###/
     # def __install_unattended_upgrades(self):
     # TO DO
+
+    ####
+    # > OsPackages.menu_installer
+    # Menu for installing packages
+    ###
+    def menu_installer(self):
+        options = [
+            "auditd",
+            "apparmor",
+            "fail2ban"
+        ]
+        answers = inquirer.prompt([
+            inquirer.List(
+                'installer_selection',
+                message="Which security packages should be present on the system?",
+                choices=options
+            )
+        ])
+        if answers['installer_selection'] == options[0]:
+            print("TODO: Apparmor")
+        elif answers['installer_selection'] == options[1]:
+            print("TODO: Apparmor")
+        elif answers['installer_selection'] == options[2]:
+            print("TODO: Apparmor")
