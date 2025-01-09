@@ -334,24 +334,36 @@ class OsPackages:
 
     ####
     # > OsPackages.menu_installer
-    # Menu for installing packages
+    # Menu for installing/removing packages
     ###
     def menu_installer(self):
         options = [
             "auditd",
             "apparmor",
-            "fail2ban"
+            "fail2ban",
+            "firewalld",
+            "unattended-upgrades"
         ]
+        installed = []
+        print("Checking for currently installed packages...")
+        for pk in options:
+            if not self.__get_package(pk):
+                installed.append(pk)
+
         answers = inquirer.prompt([
-            inquirer.List(
+            inquirer.Checkbox(
                 'installer_selection',
                 message="Which security packages should be present on the system?",
-                choices=options
+                choices=options,
+                default=installed
             )
         ])
-        if answers['installer_selection'] == options[0]:
-            print("TODO: Apparmor")
-        elif answers['installer_selection'] == options[1]:
-            print("TODO: Apparmor")
-        elif answers['installer_selection'] == options[2]:
-            print("TODO: Apparmor")
+        for pk in answers['installer_selection']:
+            if pk == "auditd":
+                print("TODO: auditd")
+            elif pk == "apparmor":
+                print("TODO: Apparmor")
+            elif pk == "fail2ban":
+                print("TODO: fail2ban")
+            elif pk == "firewalld":
+                print("TODO: firewalld")

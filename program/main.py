@@ -7,8 +7,7 @@ def main_menu():
     os_manip = OsManip()
 
     options = [
-        "Install Packages",
-        "Remove Packages",
+        "Install/Remove Packages",
         "Quit Program"
     ]
     answers = inquirer.prompt([
