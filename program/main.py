@@ -3,7 +3,42 @@ import sys
 
 from os_class import OsManip, OsPackages
 
-def main_menu():
+def menu_installer(distribution):
+    os_pkg = OsPackages(distribution)
+
+    options = [
+        "auditd",
+        "apparmor",
+        "fail2ban",
+        "firewalld",
+        "unattended-upgrades"
+    ]
+    installed = []
+    print("Checking for currently installed packages...")
+    for pk in options:
+        if not os_pkg.__get_package(pk):
+            installed.append(pk)
+
+    answers = inquirer.prompt([
+        inquirer.Checkbox(
+            'installer_selection',
+            message="Which security packages should be present on the system?",
+            choices=options,
+            default=installed
+        )
+    ])
+    for pk in answers['installer_selection']:
+        if pk == "auditd":
+            print("TODO: auditd")
+        elif pk == "apparmor":
+            print("TODO: Apparmor")
+        elif pk == "fail2ban":
+            print("TODO: fail2ban")
+        elif pk == "firewalld":
+            print("TODO: firewalld")
+
+
+if __name__ == "__main__":
     os_manip = OsManip()
 
     options = [
@@ -22,9 +57,4 @@ def main_menu():
         if not os_manip.is_root(True):
             print("Failed to escalate. Exiting program")
             sys.exit(1)
-        os_packages = OsPackages(os_manip.dist)
-        os_packages.menu_installer()
-
-
-if __name__ == "__main__":
-    main_menu()
+        menu_installer(os_manip.dist)

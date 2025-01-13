@@ -108,10 +108,10 @@ class OsPackages:
         self.__dist = dist
 
     ####
-    # > (private).__get_package
+    # > OsPackages.get_package
     # Checks if a package is installed on the system.
     ####
-    def __get_package(self, package_name):
+    def get_package(self, package_name):
         try:
             if self.__dist == "ubuntu":
                 subprocess.run(['dpkg', '-l', package_name], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -129,7 +129,7 @@ class OsPackages:
     def __install_package(self, program_name):
         try:
             if self.__dist == "ubuntu":
-                if not self.__get_package("program_name"):
+                if not self.get_package("program_name"):
                     print(f"Installing {program_name}...")
                     subprocess.run(['apt', 'install', program_name, '-qq', '-y'], check=True)
             else:
@@ -144,7 +144,7 @@ class OsPackages:
     def __update_system(self, program_name):
         try:
             if self.__dist == "ubuntu":
-                if not self.__get_package("program_name"):
+                if not self.get_package("program_name"):
                     print(f"Updating system...")
                     subprocess.run(['apt', 'update', '-qq'], check=True)
                     subprocess.run(['apt', 'upgrade', '-qq', '-y'], check=True)
@@ -280,7 +280,7 @@ class OsPackages:
         self.__install_package("firewalld")
         try:
             if self.__dist == "ubuntu":
-                if self.__get_package("iptables-persistent"):
+                if self.get_package("iptables-persistent"):
                     subprocess.run(['apt', 'purge', 'iptables-persistent', '-qq', '-y'], check=True)
             else:
                 raise Exception("on Installer.get_package")
@@ -307,7 +307,7 @@ class OsPackages:
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 2 -j DROP'], check=True)
 
-            if self.__get_package("docker"):
+            if self.get_package("docker"):
                 subprocess.run(['firewall-cmd', '--permanent', '--new-zone=docker'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--zone=docker', '--set-target=DROP'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--new-policy=docker-out'], check=True)
@@ -331,39 +331,3 @@ class OsPackages:
     ###/
     # def __install_unattended_upgrades(self):
     # TO DO
-
-    ####
-    # > OsPackages.menu_installer
-    # Menu for installing/removing packages
-    ###
-    def menu_installer(self):
-        options = [
-            "auditd",
-            "apparmor",
-            "fail2ban",
-            "firewalld",
-            "unattended-upgrades"
-        ]
-        installed = []
-        print("Checking for currently installed packages...")
-        for pk in options:
-            if not self.__get_package(pk):
-                installed.append(pk)
-
-        answers = inquirer.prompt([
-            inquirer.Checkbox(
-                'installer_selection',
-                message="Which security packages should be present on the system?",
-                choices=options,
-                default=installed
-            )
-        ])
-        for pk in answers['installer_selection']:
-            if pk == "auditd":
-                print("TODO: auditd")
-            elif pk == "apparmor":
-                print("TODO: Apparmor")
-            elif pk == "fail2ban":
-                print("TODO: fail2ban")
-            elif pk == "firewalld":
-                print("TODO: firewalld")
