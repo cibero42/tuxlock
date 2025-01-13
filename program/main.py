@@ -1,10 +1,11 @@
 import inquirer
 import sys
 
-from os_class import OsManip, OsPackages
+from os_class import OsManip, PkgInstaller, PkgConfig
 
 def menu_installer(distribution):
-    os_pkg = OsPackages(distribution)
+    installer = PkgInstaller(distribution)
+    config = PkgConfig()
 
     options = [
         "auditd",
@@ -16,7 +17,7 @@ def menu_installer(distribution):
     installed = []
     print("Checking for currently installed packages...")
     for pk in options:
-        if not os_pkg.__get_package(pk):
+        if not installer.get_package(pk):
             installed.append(pk)
 
     answers = inquirer.prompt([
@@ -29,13 +30,34 @@ def menu_installer(distribution):
     ])
     for pk in answers['installer_selection']:
         if pk == "auditd":
-            print("TODO: auditd")
+            installer.install_package("wget")
+            installer.install_package("auditd")
+            # TODO: ask user for default rules + enable program
+            # config.auditd(running_status, boot_status, install_rules = False)
+
         elif pk == "apparmor":
-            print("TODO: Apparmor")
+            installer.install_package("apparmor apparmor-utils apparmor-profiles")
+            # TODO: Ask user for options
+            # roddhjav's profiles (https://github.com/roddhjav/apparmor.d)
+            # config.apparmor(self, running_status, boot_status, install_rules = False, force_enforcing = False, run_on_boot = False)
+
         elif pk == "fail2ban":
-            print("TODO: fail2ban")
+            installer.install_package("fail2ban")
+            # TODO config
+
         elif pk == "firewalld":
-            print("TODO: firewalld")
+            installer.remove_package("iptables-persistent")
+            installer.remove_package("ufw")
+            installer.install_package("firewalld")
+            # TODO: ask user for default rules + enable program
+            # config.firewalld(self, running_status, boot_status, set_defaults = False, ipv6 = False, docker = False):
+        
+        elif pk == "unattended-upgrades":
+            installer.install_package("unattended-upgrades")
+            # TODO config
+
+    # TODO: pkg uninstall logic when installed on the system and unselected by user
+    # Ask for user confirmation per package!!!!!
 
 
 if __name__ == "__main__":

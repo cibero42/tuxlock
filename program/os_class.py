@@ -103,7 +103,7 @@ class OsManip:
             return results
 
         
-class OsPackages:
+class PkgInstaller:
     def __init__(self, dist):
         self.__dist = dist
 
@@ -123,14 +123,13 @@ class OsPackages:
             print("Logic error: " + repr(e))
 
     ####
-    # > (private).__install_package
+    # > PkgInstaller.install_package
     # Installs a package
     ####
-    def __install_package(self, program_name):
+    def install_package(self, program_name):
         try:
             if self.__dist == "ubuntu":
                 if not self.get_package("program_name"):
-                    print(f"Installing {program_name}...")
                     subprocess.run(['apt', 'install', program_name, '-qq', '-y'], check=True)
             else:
                 raise Exception("on Installer.get_package")
@@ -138,91 +137,94 @@ class OsPackages:
             print("Logic error: " + repr(e))
 
     ####
-    # > (private).__update_system
-    # Installs a package
+    # > PkgInstaller.remove_package
+    # Removes a package
     ####
-    def __update_system(self, program_name):
+    def remove_package(self, program_name):
         try:
             if self.__dist == "ubuntu":
-                if not self.get_package("program_name"):
-                    print(f"Updating system...")
-                    subprocess.run(['apt', 'update', '-qq'], check=True)
-                    subprocess.run(['apt', 'upgrade', '-qq', '-y'], check=True)
+                if self.get_package("program_name"):
+                    subprocess.run(['apt', 'purge', program_name, '-qq', '-y'], check=True)
             else:
                 raise Exception("on Installer.get_package")
         except Exception as e:
             print("Logic error: " + repr(e))
 
     ####
-    # > (private).__enable_program
-    # Starts and enables program
+    # > PkgInstaller.update_pkg_list
+    # Updates pkg database
     ####
-    def __enable_program(self, program_name):
-        print("Enabling " + program_name + "...")
-        subprocess.run(['systemctl', 'start', program_name], check=True)
-        subprocess.run(['systemctl', 'enable', program_name], check=True)
-
+    def update_pkg_list(self, program_name):
+        try:
+            if self.__dist == "ubuntu":
+                subprocess.run(['apt', 'update', '-qq'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
+        except Exception as e:
+            print("Logic error: " + repr(e))
+    
     ####
-    # > (private).__disable_program
-    # Stops and disables program
+    # > PkgInstaller.update_system
+    # Updates system
     ####
-    def __disable_program(self, program_name):
-        print("Enabling " + program_name + "...")
-        subprocess.run(['systemctl', 'stop', program_name], check=True)
-        subprocess.run(['systemctl', 'disable', program_name], check=True)
-
-    ####
-    # > (private).__install_dependencies
-    # Install dependencies for program execution.
-    ####
-    def __install_dependencies(self):
-        self.__update_system()
-        self.__install_package("wget")
-
-    ####
-    # > (private).__install_auditd
-    # Installs Auditd.
-    ####
-    def __install_auditd(self):
-        self.__install_package("auditd")
-        try:            
-            # Prompt for Neo23x0 Auditd rules
-            user_input = input("Install Neo23x0 Auditd rules? [y/n] (default: y): ").strip().lower()
-            if not user_input:
-                user_input = "y"
-
-            if user_input == "y":
-                subprocess.run(['wget', '-O', '/etc/audit/audit.rules.auto', 'https://raw.githubusercontent.com/Neo23x0/auditd/refs/heads/master/audit.rules'], check=True)
-                subprocess.run(['auditctl', '-R', '/etc/audit/audit.rules.auto'], check=True)
-
+    def update_system(self, program_name):
+        try:
+            if self.__dist == "ubuntu":
+                subprocess.run(['apt', 'upgrade', '-qq', '-y'], check=True)
+            else:
+                raise Exception("on Installer.get_package")
         except Exception as e:
             print("Logic error: " + repr(e))
 
-        self.__enable_program("auditd")
-        
+class PkgConfig:
     ####
-    # > (private).__install_apparmor
-    # CIS Benchmark v1.0.0 1.3.1.1, 1.3.1.2, 1.3.1.3, 1.3.1.4  (for Ubuntu 24.04)
-    # Installs AppArmor.
+    # > (private).__change_prog_status
+    # Enables/Disables, Starts/Stops program
     ####
-    def __install_apparmor(self):
-        self.__install_package("apparmor apparmor-utils apparmor-profiles")
-        try:
-            user_input = input("Install experimental AppArmor profiles? [y/n] (default: n) ").strip().lower()
-            if not user_input:
-                user_input = "n"
-            
-            if user_input == "y":
-                self.__install_package("apparmor-profiles-extra")
+    def __change_prog_status(self, program_name, running_status, boot_status):
+        print("Enabling " + program_name + "...")
+        if running_status:
+            subprocess.run(['systemctl', 'start', program_name], check=True)
+        else:
+            subprocess.run(['systemctl', 'stop', program_name], check=True)
 
-            user_input = input("Install roddhjav's profiles (https://github.com/roddhjav/apparmor.d)? [y/n] (default: n) ").strip().lower()
-            if not user_input:
-                user_input = "n"
-            
-            if user_input == "y":
-                print("Configuring AppArmor parser...")
-                subprocess.run(["sudo", "tee", "-a", "/etc/apparmor/parser.conf"], input="write-cache\n", text=True, check=True)
-                subprocess.run(["sudo", "tee", "-a", "/etc/apparmor/parser.conf"], input="Optimize=compress-fast\n", text=True, check=True)
+        if boot_status:
+            subprocess.run(['systemctl', 'enable', program_name], check=True)
+        else:
+            subprocess.run(['systemctl', 'disable', program_name], check=True)
+
+    ####
+    # PkgConfig.auditd(self, running_status, boot_status, [install_rules])
+    # Configures Auditd
+    ####
+    def auditd(self, running_status, boot_status, install_rules = False):
+        if install_rules:
+            self.__change_prog_status("auditd", False, boot_status)
+            try:
+                # Prompt for Neo23x0 Auditd rules
+                user_input = input("Install Neo23x0 Auditd rules? [y/n] (default: y): ").strip().lower()
+                if not user_input:
+                    user_input = "y"
+
+                if user_input == "y":
+                    subprocess.run(['wget', '-O', '/etc/audit/audit.rules.auto', 'https://raw.githubusercontent.com/Neo23x0/auditd/refs/heads/master/audit.rules'], check=True)
+                    subprocess.run(['auditctl', '-R', '/etc/audit/audit.rules.auto'], check=True)
+
+            except Exception as e:
+                print("Logic error: " + repr(e))
+        self.__change_prog_status("auditd", running_status, boot_status)
+
+    ####
+    # PkgConfig.apparmor(self, running_status, boot_status, [install_rules], [force_enforcing], [run_on_boot])
+    # Configures Apparmor
+    ####
+    def apparmor(self, running_status, boot_status, install_rules = False,
+                 force_enforcing = False, run_on_boot = False):
+        self.__change_prog_status("apparmor", False, boot_status)
+        if install_rules:
+            try:
+                subprocess.run(["tee", "-a", "/etc/apparmor/parser.conf"], input="write-cache\n", text=True, check=True)
+                subprocess.run(["tee", "-a", "/etc/apparmor/parser.conf"], input="Optimize=compress-fast\n", text=True, check=True)
 
                 self.__install_package("build-essential config-package-dev debhelper golang-go git rsync")
 
@@ -234,61 +236,63 @@ class OsPackages:
                 subprocess.run(["dpkg-buildpackage", "-b", "-d", "--no-sign"], check=True)
 
                 print("Installing the AppArmor package...")
-                subprocess.run(["sudo", "dpkg", "-i", "../apparmor.d_*.deb"], shell=True, check=True)
-        except Exception as e:
-            print("Logic error: " + repr(e))
-
-        self.__enable_program("apparmor.service")
-
+                subprocess.run(["dpkg", "-i", "../apparmor.d_*.deb"], shell=True, check=True)
+            except Exception as e:
+                print("Logic error: " + repr(e))
+        
         # Run all profiles in enforcing mode (CIS 1.3.1.4)
-        subprocess.run(['aa-enforce', '/etc/apparmor.d/*'], check=True)
+        if force_enforcing:
+            subprocess.run(['aa-enforce', '/etc/apparmor.d/*'], check=True)
+        else:
+            print("TODO: undo changes if present")
+        
+        if run_on_boot:
+            # Makes AppArmor be loaded on boot by GRUB (CIS 1.3.1.2)
+            with open('/etc/default/grub', 'r') as file:
+                lines = file.readlines()
+                grub_cmdline_pattern = r'^GRUB_CMDLINE_LINUX="(.*)"'
+                updated_lines = []
 
-        # Makes AppArmor be loaded on boot by GRUB (CIS 1.3.1.2)
-        with open('/etc/default/grub', 'r') as file:
-            lines = file.readlines()
-            grub_cmdline_pattern = r'^GRUB_CMDLINE_LINUX="(.*)"'
-            updated_lines = []
+                for line in lines:
+                    match = re.match(grub_cmdline_pattern, line)
+                    if match:
+                        current_options = match.group(1)
+                        if 'apparmor=1' not in current_options and 'security=apparmor' not in current_options:
+                            new_options = f'{current_options} apparmor=1 security=apparmor'
+                            line = f'GRUB_CMDLINE_LINUX="{new_options}"\n'
+                    updated_lines.append(line)
 
-            for line in lines:
-                match = re.match(grub_cmdline_pattern, line)
-                if match:
-                    current_options = match.group(1)
-                    if 'apparmor=1' not in current_options and 'security=apparmor' not in current_options:
-                        new_options = f'{current_options} apparmor=1 security=apparmor'
-                        line = f'GRUB_CMDLINE_LINUX="{new_options}"\n'
-                updated_lines.append(line)
+            with open('/etc/default/grub', 'w') as file:
+                file.writelines(updated_lines)
+            subprocess.run(['update-grub'], check=True)
+        else:
+            print("TODO: undo changes if present")
 
-        with open('/etc/default/grub', 'w') as file:
-            file.writelines(updated_lines)
-        subprocess.run(['update-grub'], check=True)
+        self.__change_prog_status("apparmor", running_status, boot_status)
 
     ####
-    # > (private).__install_f2b
-    #
-    # Installs Fail2Ban
-    ###
-    def __install_f2b(self):
-        self.__install_package("fail2ban")        
-        self.__enable_program("fail2ban")
+    # PkgConfig.fail2ban(self, running_status, boot_status)
+    # Configures Fail2Ban
+    ####
+    def fail2ban(self, running_status, boot_status):
+        # TODO
+        self.__change_prog_status("fail2ban", running_status, boot_status)
 
     ####
-    # > (private).__install_firewalld
-    # CIS Benchmark [4.2.1 4.2.2 4.2.3 4.2.4 4.2.5 4.2.6 4.2.7] (for Ubuntu 24.04)
-    # Installs Firewalld
+    # PkgConfig.unattended(self)
+    # Configures Unattended Upgrades
     ####
-    def __install_firewalld(self, en_ipv6, set_def):
-        self.__install_package("firewalld")
-        try:
-            if self.__dist == "ubuntu":
-                if self.get_package("iptables-persistent"):
-                    subprocess.run(['apt', 'purge', 'iptables-persistent', '-qq', '-y'], check=True)
-            else:
-                raise Exception("on Installer.get_package")
-        except Exception as e:
-            print("Logic error: " + repr(e))
+    def unattended(self):
+        # TODO
+        pass
 
-        # Set up default Firewalld rules
-        if set_def:
+    ####
+    # PkgConfig.firewalld(self, running_status, boot_status, [set_defaults], [ipv6], [docker])
+    # Configures Firewalld
+    ####
+    def firewalld(self, running_status, boot_status, set_defaults = False, 
+                  ipv6 = False, docker = False):
+        if set_defaults:
             subprocess.run(['firewall-cmd', '--permanent', '--zone=public', '--set-target=DROP'], check=True)
             subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
             subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
@@ -298,7 +302,7 @@ class OsPackages:
             subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
             subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 2 -j DROP'], check=True)
 
-            if en_ipv6:
+            if ipv6:
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
@@ -307,7 +311,7 @@ class OsPackages:
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 2 -j DROP'], check=True)
 
-            if self.get_package("docker"):
+            if docker:
                 subprocess.run(['firewall-cmd', '--permanent', '--new-zone=docker'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--zone=docker', '--set-target=DROP'], check=True)
                 subprocess.run(['firewall-cmd', '--permanent', '--new-policy=docker-out'], check=True)
@@ -320,14 +324,3 @@ class OsPackages:
                 subprocess.run(['firewall-cmd', '--permanent', '--policy=docker-routing', '--add-egress-zone docker'], check=True)
         # TO DO: Loopback interface (CIS 4.2.4)
         # TO DO: Ask user to open ports (CIS 4.2.6)
-
-        print("Enabling UFW...")
-        subprocess.run(['ufw', 'enable'], check=True)
-
-    ####
-    # > (private).__install_unattended_upgrades
-    # CIS Benchmark v1.0.0 1.2.2.1 (for Ubuntu 24.04)
-    # Installs Unattended Upgrades
-    ###/
-    # def __install_unattended_upgrades(self):
-    # TO DO
