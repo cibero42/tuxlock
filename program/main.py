@@ -81,7 +81,15 @@ def menu_installer(distribution):
 
         elif pk == "unattended-upgrades":
             installer.install_package("unattended-upgrades")
-            # TODO config: Add questions and call config.unattended_upgrades
+            unattended_answers = inquirer.prompt([
+                inquirer.Confirm('enable_unattended', message="Enable unattended-upgrades?", default=True),
+                inquirer.Confirm('set_default_rules', message="Set recommended unattended-upgrades rules?", default=True)
+            ])
+            config.unattended(
+                running_status=unattended_answers['enable_unattended'],
+                boot_status=unattended_answers['enable_unattended'],
+                set_defaults=unattended_answers['set_default_rules']
+            )
 
     # uninstall logic when package was installed on the system and unselected by user
     for pk in options:
