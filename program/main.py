@@ -37,7 +37,11 @@ def menu_installer(distribution):
                 inquirer.Confirm('enable_auditd', message="Enable auditd program?", default=True),
                 inquirer.Confirm('install_default_rules', message="Install default auditd rules?", default=True)
             ])
-            config.auditd(auditd_answers['enable_auditd'], True, install_rules=auditd_answers['install_default_rules'])
+            config.auditd(
+                running_status=auditd_answers['enable_auditd'], 
+                boot_status=auditd_answers['enable_auditd'], 
+                install_rules=auditd_answers['install_default_rules']
+            )
 
         elif pk == "apparmor":
             installer.install_package("apparmor apparmor-utils apparmor-profiles")
@@ -49,8 +53,8 @@ def menu_installer(distribution):
                 inquirer.Confirm('run_on_boot', message="Enable AppArmor to run on boot?", default=True)
             ])
             config.apparmor(
-                apparmor_answers['enable_apparmor'], 
-                True, 
+                running_status=apparmor_answers['enable_apparmor'], 
+                boot_status=apparmor_answers['enable_apparmor'], 
                 install_rules=apparmor_answers['install_rod_profiles'],
                 force_enforcing=apparmor_answers['enforce_apparmor'], 
                 run_on_boot=apparmor_answers['run_on_boot']
@@ -72,8 +76,8 @@ def menu_installer(distribution):
                 inquirer.Confirm('docker_support', message="Enable Docker support?", default=False)
             ])
             config.firewalld(
-                firewalld_answers['enable_firewalld'], 
-                True, 
+                running_status=firewalld_answers['enable_firewalld'], 
+                boot_status=firewalld_answers['enable_firewalld'],
                 set_defaults=firewalld_answers['set_default_rules'],
                 ipv6=firewalld_answers['ipv6_support'], 
                 docker=firewalld_answers['docker_support']
