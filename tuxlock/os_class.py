@@ -281,7 +281,7 @@ class PkgConfig:
     # PkgConfig.unattended(self)
     # Configures Unattended Upgrades
     ####
-    def unattended(self, running_status, boot_status, set_defaults = False):
+    def unattended(self, running_status, boot_status, set_defaults = False, unset_defaults = False):
         # TODO
         self.__change_prog_status("unattended-upgrades", running_status, boot_status)
         if set_defaults:
@@ -294,16 +294,21 @@ class PkgConfig:
                         default_exists = True
                         break
             
-            with open("/etc/apt/apt.conf.d/50unattended-upgrades", "w") as file:
+            with open("/etc/apt/apt.conf.d/50unattended-upgrades", "a") as file:
                 if not default_exists:
                     file.write("\n// TUXLOCK Defaults\n")
                     file.write('Unattended-Upgrade::AutoFixInterruptedDpkg "true";\n')
                     file.write('Unattended-Upgrade::Remove-New-Unused-Dependencies "true";\n')
                     file.write('Unattended-Upgrade::Remove-Unused-Dependencies "true";\n')
                     file.write('Unattended-Upgrade::MinimalSteps "true";\n')
+        if unset_defaults:
+            with open("/etc/apt/apt.conf.d/50unattended-upgrades", "r") as file:
+                lines = file.readlines()
+            
+            lines = [line for line in lines if not line.strip().startswith('// TUXLOCK Defaults')]
 
-
-
+            with open("/etc/apt/apt.conf.d/50unattended-upgrades", "w") as file:
+                file.writelines(lines)
 
     ####
     # PkgConfig.firewalld(self, running_status, boot_status, [set_defaults], [ipv6], [docker])
