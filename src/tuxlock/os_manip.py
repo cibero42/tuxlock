@@ -5,7 +5,7 @@ import glob
 
 class OsManip:
     def __init__(self):
-        self.__supported_dists = ["ubuntu", "rhel", "fedora"]
+        self.__supported_dists = ["ubuntu", "debian"]
         self.dist = self.__get_dist()
 
     ####
