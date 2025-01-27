@@ -8,7 +8,7 @@ class UserMenu:
         self.installer = pkg_installer
         self.execute = True
 
-    def menu_installer(self):
+    def __menu_installer(self):
         options = [
             "auditd",
             "apparmor",
@@ -107,6 +107,9 @@ class UserMenu:
                 if uninstall_answer[f"uninstall_{pk}"]:
                     self.installer.remove_package(pk)
 
+    def __menu_config(self):
+        pass
+
     def main_menu(self):
         options = [
             "Install/Remove Packages",
@@ -126,13 +129,16 @@ class UserMenu:
         # Enters installer menu
         if answers["menu_choice"] == options[0]:
             if not self.os_manip.is_root(True):
-                print("Failed to escalate. Exiting program")
+                print("Please run as root!")
                 sys.exit(1)
-            self.menu_installer()
+            self.__menu_installer()
 
         # Enters config menu
         if answers["menu_choice"] == options[1]:
-            print("TODO")
+            if not self.os_manip.is_root(True):
+                print("Please run as root!")
+                sys.exit(1)
+            self.__menu_config()
 
         # Shows about
         if answers["menu_choice"] == options[2]:
