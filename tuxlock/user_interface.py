@@ -1,6 +1,7 @@
 import sys
 import inquirer
 from colorama import Fore, Style
+from time import sleep
 
 class UserMenu:
     def __init__(self, os_manip, pkg_config, pkg_installer):
@@ -147,6 +148,12 @@ class UserMenu:
         for pk in options:
             if not self.installer.get_package(pk):
                 installed.append(pk)
+        
+        # Checks if there are no packets installed
+        if not installed:
+            print("No supported security packages were found.\nTry installing them first.")
+            sleep(2)
+            return
 
         print("\n\n################################################")
         print("Configuration Menu\n")
