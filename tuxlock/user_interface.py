@@ -92,44 +92,45 @@ class UserMenu:
         ])
         
         for pk in answers['installer_selection']:
-            if pk == "auditd":
-                self.installer.install_package("wget")
-                self.installer.install_package("auditd")
-                self.__config_auditd()
+            if (pk in answers['installer_selection']) and (pk not in installed):
+                if pk == "auditd":
+                    self.installer.install_package("wget")
+                    self.installer.install_package("auditd")
+                    self.__config_auditd()
 
-            elif pk == "apparmor":
-                self.installer.install_package("apparmor")
-                self.installer.install_package("apparmor-utils")
-                self.installer.install_package("apparmor-profiles")
-                self.__config_apparmor()
+                elif pk == "apparmor":
+                    self.installer.install_package("apparmor")
+                    self.installer.install_package("apparmor-utils")
+                    self.installer.install_package("apparmor-profiles")
+                    self.__config_apparmor()
 
-            elif pk == "fail2ban":
-                self.installer.install_package("fail2ban")
-                self.__config_fail2ban()
+                elif pk == "fail2ban":
+                    self.installer.install_package("fail2ban")
+                    self.__config_fail2ban()
 
-            elif pk == "firewalld":
-                answers = inquirer.promt([
-                    inquirer.Confirm(
-                        "proceed", 
-                        message="Upon Firewalld installation, IPTables Persistent and UFW will be uninstalled. All previous firewall configurations may be lost. Procceed?",
-                        default=False
-                        )
-                ])
-                if answers["proceed"]:
-                    self.installer.remove_package("iptables-persistent")
-                    self.installer.remove_package("ufw")
-                    self.installer.install_package("firewalld")
-                    self.__config_firewalld()
-                else:
-                    print(f"Firewalld won't be installed!")
-                    
-            elif pk == "unattended-upgrades":
-                self.installer.install_package("unattended-upgrades")
-                self.__config_unattended()
+                elif pk == "firewalld":
+                    answers = inquirer.promt([
+                        inquirer.Confirm(
+                            "proceed", 
+                            message="Upon Firewalld installation, IPTables Persistent and UFW will be uninstalled. All previous firewall configurations may be lost. Procceed?",
+                            default=False
+                            )
+                    ])
+                    if answers["proceed"]:
+                        self.installer.remove_package("iptables-persistent")
+                        self.installer.remove_package("ufw")
+                        self.installer.install_package("firewalld")
+                        self.__config_firewalld()
+                    else:
+                        print(f"Firewalld won't be installed!")
+                        
+                elif pk == "unattended-upgrades":
+                    self.installer.install_package("unattended-upgrades")
+                    self.__config_unattended()
 
         # uninstall logic when package was installed on the system and unselected by user
         for pk in options:
-            if pk not in answers['installer_selection'] and self.installer.get_package(pk):
+            if (pk not in answers['installer_selection']) and (pk in installed):
                 answer = inquirer.prompt([
                     inquirer.Confirm(f"uninstall_{pk}", message=f"Do you want to uninstall {pk}?", default=False)
                 ])
