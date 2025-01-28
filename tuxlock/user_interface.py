@@ -135,7 +135,45 @@ class UserMenu:
                     self.installer.remove_package(pk)
 
     def __menu_config(self):
-        pass
+        options = [
+            "auditd",
+            "apparmor",
+            "fail2ban",
+            "firewalld",
+            "unattended-upgrades"
+        ]
+        installed = []
+        print("Checking for currently installed packages...")
+        for pk in options:
+            if not self.installer.get_package(pk):
+                installed.append(pk)
+
+        print("\n\n################################################")
+        print("Configuration Menu\n")
+        answers = inquirer.prompt([
+            inquirer.Checkbox(
+                'selection',
+                message="Which security packages should be configured?",
+                choices=options,
+                default=installed
+            )
+        ])
+        
+        for pk in answers['selection']:
+            if pk == "auditd":
+                self.__config_auditd()
+
+            elif pk == "apparmor":
+                self.__config_apparmor()
+
+            elif pk == "fail2ban":
+                self.__config_fail2ban()
+
+            elif pk == "firewalld":
+                self.__config_firewalld()
+                    
+            elif pk == "unattended-upgrades":
+                self.__config_unattended()
 
     def __menu_about(self):
         print("\n\n\##############################################################################")
