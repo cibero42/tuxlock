@@ -98,7 +98,9 @@ class UserMenu:
                 self.__config_auditd()
 
             elif pk == "apparmor":
-                self.installer.install_package("apparmor apparmor-utils apparmor-profiles")
+                self.installer.install_package("apparmor")
+                self.installer.install_package("apparmor-utils")
+                self.installer.install_package("apparmor-profiles")
                 self.__config_apparmor()
 
             elif pk == "fail2ban":
