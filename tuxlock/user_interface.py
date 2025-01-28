@@ -137,6 +137,14 @@ class UserMenu:
     def __menu_config(self):
         pass
 
+    def __menu_about(self):
+        print("\n\n\##############################################################################")
+        print("About Tuxlock")
+        print("Version: 0.1.0")
+        print("License: AGPLv3")
+        print("Maintainers: cibero42, Mayssa-Ayachi and KHLIFMOHAMEDAMINE")
+        print("Help improving this project! https://github.com/cibero42/tuxlock")
+
     def main_menu(self):
         options = [
             "Install/Remove Packages",
@@ -169,7 +177,7 @@ class UserMenu:
 
         # Shows about
         if answers["menu_choice"] == options[2]:
-            print("TODO")
+            self.__menu_about()
 
         # Exits program
         if answers["menu_choice"] == options[3]:
