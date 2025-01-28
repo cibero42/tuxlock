@@ -5,6 +5,13 @@ from time import sleep
 
 class UserMenu:
     def __init__(self, os_manip, pkg_config, pkg_installer):
+        self.__supported_packages = [ # Supported tuxlock packages
+            "auditd",
+            "apparmor",
+            "fail2ban",
+            "firewalld",
+            "unattended-upgrades"
+        ]
         self.os_manip = os_manip
         self.config = pkg_config
         self.installer = pkg_installer
@@ -70,16 +77,9 @@ class UserMenu:
         )
 
     def __menu_installer(self):
-        options = [
-            "auditd",
-            "apparmor",
-            "fail2ban",
-            "firewalld",
-            "unattended-upgrades"
-        ]
         installed = []
         print("Checking for currently installed packages...")
-        for pk in options:
+        for pk in self.__supported_packages:
             if not self.installer.get_package(pk):
                 installed.append(pk)
 
@@ -136,16 +136,9 @@ class UserMenu:
                     self.installer.remove_package(pk)
 
     def __menu_config(self):
-        options = [
-            "auditd",
-            "apparmor",
-            "fail2ban",
-            "firewalld",
-            "unattended-upgrades"
-        ]
         installed = []
         print("Checking for currently installed packages...")
-        for pk in options:
+        for pk in self.__supported_packages:
             if not self.installer.get_package(pk):
                 installed.append(pk)
         
@@ -183,12 +176,14 @@ class UserMenu:
                 self.__config_unattended()
 
     def __menu_about(self):
+        supported_list = ", ".join(map(str, self.__supported_packages))
         print("\n\n\##############################################################################")
         print("About Tuxlock")
         print("Version: 0.1.0")
         print("License: AGPLv3")
         print("Maintainers: cibero42, Mayssa-Ayachi and KHLIFMOHAMEDAMINE")
-        print("Help improving this project! https://github.com/cibero42/tuxlock")
+        print(f"Supported security packages: {supported_list}")
+        print("\nHelp improving this project! https://github.com/cibero42/tuxlock")
 
     def main_menu(self):
         options = [
