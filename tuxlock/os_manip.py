@@ -38,7 +38,7 @@ class OsManip:
             if escalate:
                 print("Not running as root, attempting to escalate.")
                 try:
-                    subprocess.check_call(['sudo', 'python3'] + sys.argv)
+                    subprocess.check_call(['sudo', sys.executable] + sys.argv)
                 except subprocess.CalledProcessError as e:
                     print(f"Failed to escalate to root: {e}")
                 self.is_root()
