@@ -1,5 +1,6 @@
 import tuxlock
-from tuxlock import user_interface, os_manip, pkg_config, pkg_installer
+from tuxlock import user_interface
+from tuxlock import os_manip, pkg_config, pkg_installer
 
 def main():
     OsManip = os_manip.OsManip()

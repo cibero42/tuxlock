@@ -1,6 +1,5 @@
 import sys
 import inquirer
-from colorama import Fore, Style
 from time import sleep
 
 class UserMenu:
@@ -30,7 +29,7 @@ class UserMenu:
         )
 
     def __config_apparmor(self):
-        print("\n\n##################################\AppArmor Configuration\n##################################\n")
+        print("\n\n##################################\nAppArmor Configuration\n##################################\n")
         answers = inquirer.prompt([
             inquirer.Confirm('enable_apparmor', message="Enable AppArmor?", default=True),
             inquirer.Confirm('install_rod_profiles', message="Install roddhjav's profiles?", default=True),
@@ -49,7 +48,7 @@ class UserMenu:
         pass
 
     def __config_firewalld(self):
-        print("\n\n##################################\Firewalld Configuration\n##################################\n")
+        print("\n\n##################################\nFirewalld Configuration\n##################################\n")
         answers = inquirer.prompt([
             inquirer.Confirm('enable_firewalld', message="Enable firewalld?", default=True),
             inquirer.Confirm('set_default_rules', message="Set default firewall rules?", default=True),
@@ -65,7 +64,7 @@ class UserMenu:
         )
 
     def __config_unattended(self):
-        print("\n\n##################################\Unattended Upgrades Configuration\n##################################\n")
+        print("\n\n##################################\nUnattended Upgrades Configuration\n##################################\n")
         answers = inquirer.prompt([
             inquirer.Confirm('enable_unattended', message="Enable unattended-upgrades?", default=True),
             inquirer.Confirm('set_default_rules', message="Set recommended unattended-upgrades rules?", default=True)
@@ -87,7 +86,7 @@ class UserMenu:
             inquirer.Checkbox(
                 'installer_selection',
                 message="Which security packages should be present on the system ?",
-                choices=options,
+                choices=self.__supported_packages,
                 default=installed
             )
         ])
@@ -120,7 +119,7 @@ class UserMenu:
                     self.installer.install_package("firewalld")
                     self.__config_firewalld()
                 else:
-                    print(f"{Fore.RED}Firewalld won't be installed!{Style.RESET_ALL}")
+                    print(f"Firewalld won't be installed!")
                     
             elif pk == "unattended-upgrades":
                 self.installer.install_package("unattended-upgrades")
@@ -154,7 +153,7 @@ class UserMenu:
             inquirer.Checkbox(
                 'selection',
                 message="Which security packages should be configured?",
-                choices=options,
+                choices=self.__supported_packages,
                 default=installed
             )
         ])
@@ -177,7 +176,7 @@ class UserMenu:
 
     def __menu_about(self):
         supported_list = ", ".join(map(str, self.__supported_packages))
-        print("\n\n\##############################################################################")
+        print("\n\n##############################################################################")
         print("About Tuxlock")
         print("Version: 0.1.0")
         print("License: AGPLv3")
