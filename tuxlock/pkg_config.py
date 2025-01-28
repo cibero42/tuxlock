@@ -27,12 +27,7 @@ class PkgConfig:
         if install_rules:
             self.__change_prog_status("auditd", False, boot_status)
             try:
-                # Prompt for Neo23x0 Auditd rules
-                user_input = input("Install Neo23x0 Auditd rules? [y/n] (default: y): ").strip().lower()
-                if not user_input:
-                    user_input = "y"
-
-                if user_input == "y":
+                if install_rules:
                     subprocess.run(['wget', '-O', '/etc/audit/audit.rules.auto', 'https://raw.githubusercontent.com/Neo23x0/auditd/refs/heads/master/audit.rules'], check=True)
                     subprocess.run(['auditctl', '-R', '/etc/audit/audit.rules.auto'], check=True)
 

@@ -1,5 +1,6 @@
 import sys
 import inquirer
+from colorama import Fore, Style
 
 class UserMenu:
     def __init__(self, os_manip, pkg_config, pkg_installer):
@@ -7,6 +8,65 @@ class UserMenu:
         self.config = pkg_config
         self.installer = pkg_installer
         self.execute = True
+
+    def __config_auditd(self):
+        print("\n\n##################################\nAuditd Configuration\n##################################\n")
+        answers = inquirer.prompt([
+            inquirer.Confirm('enable_auditd', message="Enable auditd program?", default=True),
+            inquirer.Confirm('install_default_rules', message="Install Neo23x0 Auditd rules?", default=True)
+        ])
+        self.config.auditd(
+            running_status=answers['enable_auditd'], 
+            boot_status=answers['enable_auditd'], 
+            install_rules=answers['install_default_rules']
+        )
+
+    def __config_apparmor(self):
+        print("\n\n##################################\AppArmor Configuration\n##################################\n")
+        answers = inquirer.prompt([
+            inquirer.Confirm('enable_apparmor', message="Enable AppArmor?", default=True),
+            inquirer.Confirm('install_rod_profiles', message="Install roddhjav's profiles?", default=True),
+            inquirer.Confirm('enforce_apparmor', message="Enforce AppArmor policies?", default=True),
+            inquirer.Confirm('run_on_boot', message="Enable AppArmor to run on boot?", default=True)
+        ])
+        self.config.apparmor(
+            running_status=answers['enable_apparmor'], 
+            boot_status=answers['enable_apparmor'], 
+            install_rules=answers['install_rod_profiles'],
+            force_enforcing=answers['enforce_apparmor'], 
+            run_on_boot=answers['run_on_boot']
+        )
+
+    def __config_fail2ban(self):
+        pass
+
+    def __config_firewalld(self):
+        print("\n\n##################################\Firewalld Configuration\n##################################\n")
+        answers = inquirer.prompt([
+            inquirer.Confirm('enable_firewalld', message="Enable firewalld?", default=True),
+            inquirer.Confirm('set_default_rules', message="Set default firewall rules?", default=True),
+            inquirer.Confirm('ipv6_support', message="Enable IPv6 support?", default=False),
+            inquirer.Confirm('docker_support', message="Enable Docker support?", default=False)
+        ])
+        self.config.firewalld(
+            running_status=answers['enable_firewalld'], 
+            boot_status=answers['enable_firewalld'],
+            set_defaults=answers['set_default_rules'],
+            ipv6=answers['ipv6_support'], 
+            docker=answers['docker_support']
+        )
+
+    def __config_unattended(self):
+        print("\n\n##################################\Unattended Upgrades Configuration\n##################################\n")
+        answers = inquirer.prompt([
+            inquirer.Confirm('enable_unattended', message="Enable unattended-upgrades?", default=True),
+            inquirer.Confirm('set_default_rules', message="Set recommended unattended-upgrades rules?", default=True)
+        ])
+        self.config.unattended(
+            running_status=answers['enable_unattended'],
+            boot_status=answers['enable_unattended'],
+            set_defaults=answers['set_default_rules']
+        )
 
     def __menu_installer(self):
         options = [
@@ -35,76 +95,43 @@ class UserMenu:
             if pk == "auditd":
                 self.installer.install_package("wget")
                 self.installer.install_package("auditd")
-                # Ask user for default rules and enable program
-                auditd_answers = inquirer.prompt([
-                    inquirer.Confirm('enable_auditd', message="Enable auditd program?", default=True),
-                    inquirer.Confirm('install_default_rules', message="Install default auditd rules?", default=True)
-                ])
-                self.config.auditd(
-                    running_status=auditd_answers['enable_auditd'], 
-                    boot_status=auditd_answers['enable_auditd'], 
-                    install_rules=auditd_answers['install_default_rules']
-                )
+                self.__config_auditd()
 
             elif pk == "apparmor":
                 self.installer.install_package("apparmor apparmor-utils apparmor-profiles")
-                # Ask user for options
-                apparmor_answers = inquirer.prompt([
-                    inquirer.Confirm('enable_apparmor', message="Enable AppArmor?", default=True),
-                    inquirer.Confirm('install_rod_profiles', message="Install roddhjav's profiles?", default=True),
-                    inquirer.Confirm('enforce_apparmor', message="Enforce AppArmor policies?", default=True),
-                    inquirer.Confirm('run_on_boot', message="Enable AppArmor to run on boot?", default=True)
-                ])
-                self.config.apparmor(
-                    running_status=apparmor_answers['enable_apparmor'], 
-                    boot_status=apparmor_answers['enable_apparmor'], 
-                    install_rules=apparmor_answers['install_rod_profiles'],
-                    force_enforcing=apparmor_answers['enforce_apparmor'], 
-                    run_on_boot=apparmor_answers['run_on_boot']
-                )
+                self.__config_apparmor()
 
             elif pk == "fail2ban":
                 self.installer.install_package("fail2ban")
-                # TODO config: Add questions and call config.fail2ban
+                self.__config_fail2ban()
 
             elif pk == "firewalld":
-                self.installer.remove_package("iptables-persistent")
-                self.installer.remove_package("ufw")
-                self.installer.install_package("firewalld")
-                # Ask user for default rules and enable program
-                firewalld_answers = inquirer.prompt([
-                    inquirer.Confirm('enable_firewalld', message="Enable firewalld?", default=True),
-                    inquirer.Confirm('set_default_rules', message="Set default firewall rules?", default=True),
-                    inquirer.Confirm('ipv6_support', message="Enable IPv6 support?", default=False),
-                    inquirer.Confirm('docker_support', message="Enable Docker support?", default=False)
+                answers = inquirer.promt([
+                    inquirer.Confirm(
+                        "proceed", 
+                        message="Upon Firewalld installation, IPTables Persistent and UFW will be uninstalled. All previous firewall configurations may be lost. Procceed?",
+                        default=False
+                        )
                 ])
-                self.config.firewalld(
-                    running_status=firewalld_answers['enable_firewalld'], 
-                    boot_status=firewalld_answers['enable_firewalld'],
-                    set_defaults=firewalld_answers['set_default_rules'],
-                    ipv6=firewalld_answers['ipv6_support'], 
-                    docker=firewalld_answers['docker_support']
-                )
-
+                if answers["proceed"]:
+                    self.installer.remove_package("iptables-persistent")
+                    self.installer.remove_package("ufw")
+                    self.installer.install_package("firewalld")
+                    self.__config_firewalld()
+                else:
+                    print(f"{Fore.RED}Firewalld won't be installed!{Style.RESET_ALL}")
+                    
             elif pk == "unattended-upgrades":
                 self.installer.install_package("unattended-upgrades")
-                unattended_answers = inquirer.prompt([
-                    inquirer.Confirm('enable_unattended', message="Enable unattended-upgrades?", default=True),
-                    inquirer.Confirm('set_default_rules', message="Set recommended unattended-upgrades rules?", default=True)
-                ])
-                self.config.unattended(
-                    running_status=unattended_answers['enable_unattended'],
-                    boot_status=unattended_answers['enable_unattended'],
-                    set_defaults=unattended_answers['set_default_rules']
-                )
+                self.__config_unattended()
 
         # uninstall logic when package was installed on the system and unselected by user
         for pk in options:
             if pk not in answers['installer_selection'] and self.installer.get_package(pk):
-                uninstall_answer = inquirer.prompt([
+                answer = inquirer.prompt([
                     inquirer.Confirm(f"uninstall_{pk}", message=f"Do you want to uninstall {pk}?", default=False)
                 ])
-                if uninstall_answer[f"uninstall_{pk}"]:
+                if answer[f"uninstall_{pk}"]:
                     self.installer.remove_package(pk)
 
     def __menu_config(self):
