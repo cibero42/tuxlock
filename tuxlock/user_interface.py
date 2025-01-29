@@ -16,6 +16,10 @@ class UserMenu:
         self.installer = pkg_installer
         self.execute = True
 
+    def __on_hold(self):
+        print("Press enter to continue...")
+        input()
+
     def __config_auditd(self):
         print("\n\n##################################\nAuditd Configuration\n##################################\n")
         answers = inquirer.prompt([
@@ -109,7 +113,7 @@ class UserMenu:
                     self.__config_fail2ban()
 
                 elif pk == "firewalld":
-                    answers = inquirer.promt([
+                    answers = inquirer.prompt([
                         inquirer.Confirm(
                             "proceed", 
                             message="Upon Firewalld installation, IPTables Persistent and UFW will be uninstalled. All previous firewall configurations may be lost. Procceed?",
@@ -147,7 +151,7 @@ class UserMenu:
         # Checks if there are no packets installed
         if not installed:
             print("No supported security packages were found.\nTry installing them first.")
-            sleep(2)
+            self.__on_hold()
             return
 
         print("\n\n################################################")
@@ -186,6 +190,8 @@ class UserMenu:
         print("Maintainers: cibero42, Mayssa-Ayachi and KHLIFMOHAMEDAMINE")
         print(f"Supported security packages: {supported_list}")
         print("\nHelp improving this project! https://github.com/cibero42/tuxlock")
+        self.__on_hold()
+
 
     def main_menu(self):
         options = [
