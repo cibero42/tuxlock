@@ -23,45 +23,56 @@ class UserMenu:
     def __config_auditd(self):
         print("\n\n##################################\nAuditd Configuration\n##################################\n")
         answers = inquirer.prompt([
-            inquirer.Confirm('enable_auditd', message="Enable auditd program?", default=True),
+            inquirer.Confirm('start', message="Start Auditd?", default=True),
+            inquirer.Confirm('enable', message="Enable Auditd on boot?", default=True),
             inquirer.Confirm('install_default_rules', message="Install Neo23x0 Auditd rules?", default=True)
         ])
         self.config.auditd(
-            running_status=answers['enable_auditd'], 
-            boot_status=answers['enable_auditd'], 
+            running_status=answers['start'], 
+            boot_status=answers['enable'], 
             install_rules=answers['install_default_rules']
         )
 
     def __config_apparmor(self):
         print("\n\n##################################\nAppArmor Configuration\n##################################\n")
         answers = inquirer.prompt([
-            inquirer.Confirm('enable_apparmor', message="Enable AppArmor?", default=True),
+            inquirer.Confirm('start', message="Start AppArmor?", default=True),
+            inquirer.Confirm('enable', message="Enable AppArmor on boot?", default=True),
             inquirer.Confirm('install_rod_profiles', message="Install roddhjav's profiles?", default=True),
             inquirer.Confirm('enforce_apparmor', message="Enforce AppArmor policies?", default=True),
             inquirer.Confirm('run_on_boot', message="Enable AppArmor to run on boot?", default=True)
         ])
         self.config.apparmor(
-            running_status=answers['enable_apparmor'], 
-            boot_status=answers['enable_apparmor'], 
+            running_status=answers['start'], 
+            boot_status=answers['enable'], 
             install_rules=answers['install_rod_profiles'],
             force_enforcing=answers['enforce_apparmor'], 
             run_on_boot=answers['run_on_boot']
         )
 
     def __config_fail2ban(self):
-        pass
+        print("\n\n##################################\nFirewalld Configuration\n##################################\n")
+        answers = inquirer.prompt([
+            inquirer.Confirm('start', message="Start Fail2Ban?", default=True),
+            inquirer.Confirm('enable', message="Enable Fail2Ban on boot?", default=True),
+        ])
+        self.config.fail2ban(
+            running_status=answers['start'], 
+            boot_status=answers['enable']
+        )
 
     def __config_firewalld(self):
         print("\n\n##################################\nFirewalld Configuration\n##################################\n")
         answers = inquirer.prompt([
-            inquirer.Confirm('enable_firewalld', message="Enable firewalld?", default=True),
+            inquirer.Confirm('start', message="Start Firewalld?", default=True),
+            inquirer.Confirm('enable', message="Enable Firewalld on boot?", default=True),
             inquirer.Confirm('set_default_rules', message="Set default firewall rules?", default=True),
             inquirer.Confirm('ipv6_support', message="Enable IPv6 support?", default=False),
             inquirer.Confirm('docker_support', message="Enable Docker support?", default=False)
         ])
         self.config.firewalld(
-            running_status=answers['enable_firewalld'], 
-            boot_status=answers['enable_firewalld'],
+            running_status=answers['start'], 
+            boot_status=answers['enable'],
             set_defaults=answers['set_default_rules'],
             ipv6=answers['ipv6_support'], 
             docker=answers['docker_support']
@@ -70,12 +81,13 @@ class UserMenu:
     def __config_unattended(self):
         print("\n\n##################################\nUnattended Upgrades Configuration\n##################################\n")
         answers = inquirer.prompt([
-            inquirer.Confirm('enable_unattended', message="Enable unattended-upgrades?", default=True),
+            inquirer.Confirm('start', message="Start Unattended Upgrades?", default=True),
+            inquirer.Confirm('enable', message="Enable Unattended Upgrades on boot?", default=True),
             inquirer.Confirm('set_default_rules', message="Set recommended unattended-upgrades rules?", default=True)
         ])
         self.config.unattended(
-            running_status=answers['enable_unattended'],
-            boot_status=answers['enable_unattended'],
+            running_status=answers['start'],
+            boot_status=answers['enable'],
             set_defaults=answers['set_default_rules']
         )
 
@@ -133,7 +145,7 @@ class UserMenu:
                     self.__config_unattended()
 
         # uninstall logic when package was installed on the system and unselected by user
-        for pk in options:
+        for pk in self.__supported_packages:
             if (pk not in answers['installer_selection']) and (pk in installed):
                 answer = inquirer.prompt([
                     inquirer.Confirm(f"uninstall_{pk}", message=f"Do you want to uninstall {pk}?", default=False)

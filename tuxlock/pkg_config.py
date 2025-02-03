@@ -96,7 +96,6 @@ class PkgConfig:
     # Configures Fail2Ban
     ####
     def fail2ban(self, running_status, boot_status):
-        # TODO
         self.__change_prog_status("fail2ban", running_status, boot_status)
 
     ####
@@ -104,7 +103,6 @@ class PkgConfig:
     # Configures Unattended Upgrades
     ####
     def unattended(self, running_status, boot_status, set_defaults = False, unset_defaults = False):
-        # TODO
         self.__change_prog_status("unattended-upgrades", running_status, boot_status)
         if set_defaults:
             default_exists = False
