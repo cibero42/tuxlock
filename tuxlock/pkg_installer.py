@@ -11,7 +11,7 @@ class PkgInstaller:
     def get_package(self, package_name):
         try:
             if self.__dist == "ubuntu":
-                subprocess.run(['dpkg', '-l', package_name], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                subprocess.run(['dpkg', '-s', package_name], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 return True
             raise Exception("on Installer.get_package")
         except subprocess.CalledProcessError:

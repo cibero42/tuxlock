@@ -136,24 +136,25 @@ class PkgConfig:
     ####
     def firewalld(self, running_status, boot_status, set_defaults = False, 
                   ipv6 = False, docker = False):
+        self.__change_prog_status("firewalld", running_status, boot_status)
         if set_defaults:
             subprocess.run(['firewall-cmd', '--permanent', '--zone=public', '--set-target=DROP'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
-            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv4 filter OUTPUT 2 -j DROP'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
+            subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv4 filter OUTPUT 2 -j DROP'], check=True)
 
             if ipv6:
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
-                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule' 'ipv6 filter OUTPUT 2 -j DROP'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 0 -m state --state ESTABLISHED,RELATED -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 80 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 443 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 1 -p tcp --state NEW --dport 53 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 53 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 1 -p udp --state NEW --dport 123 -j ACCEPT'], check=True)
+                subprocess.run(['firewall-cmd', '--permanent', '--direct', '--add-rule', 'ipv6 filter OUTPUT 2 -j DROP'], check=True)
 
             if docker:
                 subprocess.run(['firewall-cmd', '--permanent', '--new-zone=docker'], check=True)

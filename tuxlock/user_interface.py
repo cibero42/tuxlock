@@ -40,7 +40,7 @@ class UserMenu:
             inquirer.Confirm('enable', message="Enable AppArmor on boot?", default=True),
             inquirer.Confirm('install_rod_profiles', message="Install roddhjav's profiles?", default=True),
             inquirer.Confirm('enforce_apparmor', message="Enforce AppArmor policies?", default=True),
-            inquirer.Confirm('run_on_boot', message="Enable AppArmor to run on boot?", default=True)
+            inquirer.Confirm('run_on_boot', message="Enable AppArmor on bootloader?", default=True)
         ])
         self.config.apparmor(
             running_status=answers['start'], 
@@ -95,7 +95,7 @@ class UserMenu:
         installed = []
         print("Checking for currently installed packages...")
         for pk in self.__supported_packages:
-            if not self.installer.get_package(pk):
+            if self.installer.get_package(pk):
                 installed.append(pk)
 
         answers = inquirer.prompt([
@@ -157,7 +157,7 @@ class UserMenu:
         installed = []
         print("Checking for currently installed packages...")
         for pk in self.__supported_packages:
-            if not self.installer.get_package(pk):
+            if self.installer.get_package(pk):
                 installed.append(pk)
         
         # Checks if there are no packets installed
