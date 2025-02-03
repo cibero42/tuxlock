@@ -154,6 +154,7 @@ class UserMenu:
         # uninstall logic when package was installed on the system and unselected by user
         for pk in self.__supported_packages:
             if (pk not in answers['installer_selection']) and (pk in installed):
+                print("\n\n###########\n# WARNING #\n###########\n")
                 answer = inquirer.prompt([
                     inquirer.Confirm(f"uninstall_{pk}", message=f"Do you want to uninstall {pk}?", default=False)
                 ])

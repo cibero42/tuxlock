@@ -36,7 +36,7 @@ class OsManip:
     def is_root(self, escalate=False):
         if os.geteuid() != 0:
             if escalate:
-                print("Not running as root, attempting to escalate.")
+                print("Not running as root, attempting to escalate.\n")
                 try:
                     subprocess.check_call(['sudo', sys.executable] + sys.argv)
                 except subprocess.CalledProcessError as e:
