@@ -40,7 +40,7 @@ class PkgInstaller:
     def remove_package(self, program_name):
         try:
             if self.__dist == "ubuntu":
-                if self.get_package("program_name"):
+                if self.get_package(program_name):
                     subprocess.run(['apt', 'purge', program_name, '-qq', '-y'], check=True)
             else:
                 raise Exception("on Installer.get_package")

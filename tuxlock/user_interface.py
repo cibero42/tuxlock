@@ -20,6 +20,9 @@ class UserMenu:
         print("Press enter to continue...")
         input()
 
+    def __msg_end_wizard(self, pkg_name):
+        print(f"\n\n\nThe wizard for {pkg_name} succeeded!\n\n")
+
     def __config_auditd(self):
         print("\n\n##################################\nAuditd Configuration\n##################################\n")
         answers = inquirer.prompt([
@@ -32,6 +35,7 @@ class UserMenu:
             boot_status=answers['enable'], 
             install_rules=answers['install_default_rules']
         )
+        self.__msg_end_wizard("Auditd")
 
     def __config_apparmor(self):
         print("\n\n##################################\nAppArmor Configuration\n##################################\n")
@@ -49,6 +53,7 @@ class UserMenu:
             force_enforcing=answers['enforce_apparmor'], 
             run_on_boot=answers['run_on_boot']
         )
+        self.__msg_end_wizard("AppArmor")
 
     def __config_fail2ban(self):
         print("\n\n##################################\nFirewalld Configuration\n##################################\n")
@@ -77,6 +82,7 @@ class UserMenu:
             ipv6=answers['ipv6_support'], 
             docker=answers['docker_support']
         )
+        self.__msg_end_wizard("Firewalld")
 
     def __config_unattended(self):
         print("\n\n##################################\nUnattended Upgrades Configuration\n##################################\n")
@@ -90,6 +96,7 @@ class UserMenu:
             boot_status=answers['enable'],
             set_defaults=answers['set_default_rules']
         )
+        self.__msg_end_wizard("Unattended Upgrades")
 
     def __menu_installer(self):
         installed = []
