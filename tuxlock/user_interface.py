@@ -180,8 +180,7 @@ class UserMenu:
             inquirer.Checkbox(
                 'selection',
                 message="Which security packages should be configured?",
-                choices=self.__supported_packages,
-                default=installed
+                choices=self.__supported_packages
             )
         ])
         
